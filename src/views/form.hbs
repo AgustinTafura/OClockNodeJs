@@ -560,7 +560,7 @@
       var addressComplete = $('#street_name')[0].value + " " + $('#street_number')[0].value +', ' + $('#city')[0].value +', ' + $('#country')[0].value;
      return $.get('https://maps.googleapis.com/maps/api/geocode/json?',
       {
-        address: addressComplete, key: 'AIzaSyCveMczcJsme8vew0YXARS70KKZ5rVFdAc'
+        address: addressComplete, key: 'aqui va la api de google'
       })
       .done(function(data){
         lat = data.results[0].geometry.location.lat;
