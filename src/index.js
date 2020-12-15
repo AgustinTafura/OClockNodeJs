@@ -20,7 +20,6 @@ require('./lib/passport');
 
 
 
-
 //settings
 app.set('port', process.env.PORT || 4000);
 app.set('views', path.join(__dirname, 'views'));  //establezco donde esta mi caprta de vistas por defecto
@@ -63,9 +62,10 @@ app.use((req, res, next) => {
   app.locals.successful = req.flash('successful');
   app.locals.error = req.flash('error');
   app.locals.user = req.user;
+  app.locals.apiGoogle = process.env.API_KEY_GOOGLE;
   app.locals.errors = (req.session.errors);
   app.locals.dataForm = (req.session.dataForm);
-  app.locals.recentlyStored = (req.session.stored)
+  app.locals.recentlyStored = (req.session.stored);
   res.locals = app.locals;
   res.locals.login = req.isAuthenticated();
   res.locals.weekDays = [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
