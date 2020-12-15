@@ -1,0 +1,7 @@
+@import "node_module/@fullcalendar/common/main";
+@import "node_module/@fullcalendar/daygrid/main";
+@import "node_module/@fullcalendar/list/main";
+@import "node_module/@fullcalendar/timegrid/main";
+
+
+@import url('https://kit.fontawesome.com/01449c785e.js');

@@ -1,0 +1,167 @@
+{{#section 'scripts'}}
+  <script type="text/javascript">
+    //passwords match
+    var password = document.getElementById("password");
+    var confirm_password = document.getElementById("password_confirmation");
+
+    function validatePassword(){
+      if(password.value != confirm_password.value) {
+        confirm_password.setCustomValidity("Passwords Don't Match")
+        console.log(11111111);
+      } else {
+        confirm_password.setCustomValidity('');
+        console.log(22222222);
+      }
+    }
+
+    password.onchange = validatePassword;
+    confirm_password.onkeyup = validatePassword;
+  </script>
+{{/section}}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+              {{#if auth}}
+                Editar mi Cuenta
+              {{else}}
+                Register
+              {{/if}}
+            </div>
+
+            <div class="card-body">
+              {{#if auth}}
+                <form method="PUT" action="user/update/{{id}}" id="form_user_update">
+                {{!-- method('PUT') --}}
+              {{else}}
+                <form method="POST" action="register" id="form_user_register">
+              {{/if}}
+                    {{!-- csrf --}}
+                    <div class="form-group row">
+                        <label for="name" class="col-md-4 col-form-label text-md-right">Name</label>
+
+                        <div class="col-md-6">
+                            <input id="name" type="text" class="form-control {{#if errors.name}} is-invalid {{/if}}" name="name" value="{{#if auth}} {{auth.name}} {{else}} {{dataForm.name}} {{/if}} " required autocomplete="name" autofocus>
+
+                            {{#if errors.name}}
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ errors.name }}</strong>
+                                </span>
+                            {{/if}}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="surname" class="col-md-4 col-form-label text-md-right">Surame</label>
+
+                        <div class="col-md-6">
+                            <input id="surname" type="text" class="form-control {{#if errors.surname}} is-invalid {{/if}}" name="surname" value="{{#if auth}} {{auth.surname}} {{else}} {{#if dataForm.surname}} {{dataForm.surname}} {{/if}} {{/if}} " required autocomplete="name" autofocus>
+
+                            {{#if errors.surname}}
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ errors.surname }}</strong>
+                                </span>
+                            {{/if}}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="email" class="col-md-4 col-form-label text-md-right">E-Mail Address</label>
+
+                        <div class="col-md-6">
+                            <input id="email" type="email" class="form-control {{#if errors.email}} is-invalid {{/if}}" name="email" value="{{#if auth}} {{auth.email}} {{else}} {{#if dataForm.email}} {{dataForm.email}} {{/if}} {{/if}} " required autocomplete="email">
+
+                            {{#if errors.email}}
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{errors.email}}</strong>
+                                </span>
+                            {{/if}}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="mobile_phone" class="col-md-4 col-form-label text-md-right"> Mobile Phone </label>
+
+                        <div class="col-md-6">
+                            <input id="mobile_phone" type="tel" class="form-control {{#if errors.mobile_phone}} is-invalid {{/if}}" name="mobile_phone" value="{{#if auth}}{{auth.mobile_phone}}{{else}}{{#if dataForm.mobile_phone}}{{dataForm.mobile_phone}}{{/if}}{{/if}}" required autocomplete="mobile_phone">
+
+                            {{#if errors.mobile_phone}}
+                                <span class="invalid-feedback" role="alert">
+                                    <strong> {{errors.mobile_phone}} </strong>
+                                </span>
+                            {{/if}}
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        <label for="day" class="col-md-4 col-form-label text-md-right">Date of Birth:</label>
+                        <div class="col-md-6" style="display:flex">
+
+                        <select name="day" id="day" class="form-control col-md-4 {{#if errors.day}} is-invalid {{/if}}" name="day" value="{{#if auth}}{{auth.day}}{{else}}{{#if dataForm.day}}{{dataForm.day}}{{/if}}{{/if}}" required autocomplete="day">
+                          <option value="" > Day </option>
+                          {{#for 1 32 1}}
+                            <option value="{{this}}" {{#if auth}}{{#checkDate this 'd' user.birthdate 'selected'}} {{this}} {{/checkDate}} {{/if}} {{#ifEquals this ../dataForm.day 'selected'}} {{this}} {{/ifEquals}}> {{this}}</option>
+                          {{/for}}
+                        </select>
+                        <select name="month" id="month" class="form-control col-md-4 {{#if errors.month}} is-invalid {{/if}}" name="month" value="{{#if auth}} {{auth.month}} {{else}} {{#if dataForm.month}} {{dataForm.month}} {{/if}} {{/if}}" required autocomplete="month">
+                          <option value="" selected>Month</option>
+                          {{#for 1 13 1}}
+                              <option value="{{this}}"{{#if auth}}{{#checkDate this 'm' user.birthdate 'selected'}} {{this}} {{/checkDate}} {{/if}} {{#ifEquals this ../dataForm.month 'selected'}} {{this}} {{/ifEquals}}> {{this}} </option>
+                          {{/for}}
+                        </select>
+                        <select name="year" id="year" class="form-control col-md-4 {{#if errors.year}} is-invalid {{/if}}" name="year" value="{{#if auth}} {{auth.year}} {{else}} {{#if dataForm.year}} {{dataForm.year}} {{/if}} {{/if}}" required autocomplete="year">
+                          <option value="" selected>Year</option>
+                          {{#forLess 110 1}}
+                          <option value="{{this}}" {{#if auth}}{{#checkDate this 'Y' user.birthdate 'selected'}} {{this}} {{/checkDate}} {{/if}} {{#ifEquals this ../dataForm.year 'selected'}} {{this}} {{/ifEquals}}> {{this}} </option>
+                          {{/forLess }}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="password" class="col-md-4 col-form-label text-md-right">Password</label>
+
+                        <div class="col-md-6">
+                            <input id="password" type="password" data-msg="Please fill this field" class="form-control {{#if errors.password}} is-invalid {{/if}}" name="password" {{#if auth}} placeholder="xxxxxxxx" {{else}} required {{/if}} autocomplete="new-password">
+                            {{#if errors.password}}
+                                <span class="invalid-feedback" role="alert">
+                                    <strong> {{errors.password}} </strong>
+                                </span>
+                            {{/if}}
+                        </div>
+                    </div>
+
+                    <div class="form-group row" id="password_confirmed" {{#if auth}} hidden {{/if}} >
+                        <label for="password_confirmation" class="col-md-4 col-form-label text-md-right">Confirm Password</label>
+
+                        <div class="col-md-6">
+                            <input id="password_confirmation" type="password" class="form-control" name="password_confirmation" {{#unless auth}} required {{/unless}} autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-0">
+                        <div class="col-md-6 offset-md-4">
+                            <button type="submit" class="btn btn-primary {{#if auth}} disabled {{/if}}">
+                              {{#if auth}}
+                                Actualizar
+                              {{else}}
+                                Register
+                              {{/if}}
+
+                            </button>
+                              {{#if auth}}
+                              <a href="/home">
+                                <button type="button" class="btn btn-light">
+                                  Cancelar
+                                </button>
+                              </a>
+                            {{/if}}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

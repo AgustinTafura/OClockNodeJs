@@ -1,0 +1,83 @@
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Login</div>
+            <div class="card-body">
+              {{#if successful}}
+              <div class="container p-4">
+                  <div class="row">
+                      <div class="col-md-4 mx-auto">
+                          <div class="alert alert-success alert-dismissible fade show" role="alert">
+                              {{successful}}
+                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              {{/if}}              
+
+                <form method="POST" action="login">
+                    <div class="form-group row">
+                        <label for="email" class="col-md-4 col-form-label text-md-right">E-Mail Address</label>
+
+                        <div class="col-md-6">
+                            <input id="email" type="email" class="form-control {{#if errors.email}} is-invalid {{/if}}" name="email" value="{{#if dataForm.email}} {{dataForm.email}} {{/if}}" required autocomplete="email" autofocus>
+
+                            {{#if errors.email}}
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ errors.email }}</strong>
+                                </span>
+                            {{/if}}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="password" class="col-md-4 col-form-label text-md-right">Password</label>
+
+                        <div class="col-md-6">
+                            <input id="password" type="password" class="form-control {{#if errors.password}} is-invalid {{/if}}" name="password" required autocomplete="current-password">
+
+                            {{#if errors.password}}
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ errors.password }}</strong>
+                                </span>
+                            {{/if}}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-md-6 offset-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remember" id="remember" {{#if errors.password}} "checked"{{/if }}>
+
+                                <label class="form-check-label" for="remember">
+                                    Remember Me
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-0">
+                        <div class="col-md-8 offset-md-4">
+                            <button type="submit" class="btn btn-primary">
+                                Login
+                            </button>
+                            <a class="btn btn-link" href="/password">
+                              Forgot Your Password?
+                            </a>
+                        </div>
+                    </div>
+                    <div class="form-group row mb-0">
+                        <div class="col-md-8 offset-md-4">
+                          <a class="btn btn-link pl-0 {{#if error}} text-error {{else}} text-secondary {{/if}}" href="/register">
+                            Create your account
+                          </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

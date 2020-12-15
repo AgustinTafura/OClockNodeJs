@@ -1,0 +1,18 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+
+
+//Variables Color O'Clock
+$primary: #525575;
+$secondary:#383a4f;
+
+
+// Bootstrap
+@import "node_modules/bootstrap/scss/bootstrap";
+
+// O'clock styles
+@import 'oclock_style';

@@ -1,0 +1,42 @@
+
+{{#section 'scripts'}}
+  <script type="text/javascript">
+    $(function() {
+      $('#principalContainer').removeClass('container')
+      $('#principalContainer').addClass('container-fluid')
+    })
+  </script>
+{{/section}}
+
+<div id="home">
+  <a href="user/edit">
+    <div class="">
+      <span>MIS DATOS</span>
+    </div>
+  </a>
+  <a href="#">
+    <div class="">
+      <span>TURNOS</span>
+    </div>
+  </a>
+  <a href="search">
+    <div class="">
+      <span>NUEVO TURNO</span>
+    </div>
+  </a>
+  <div id='calendar'></div>
+  <BR>
+  {{!-- @if ($user->provider)
+    <a href="{{ route('user.editMe')}}">
+    <a href="{{ route('user.edit.my') }}">
+      <div class="">
+        <span>DATOS PROFESIONALES</span>
+      </div>
+    </a>
+    <a href="#">
+      <div class="">
+        <span>AGENDA</span>
+      </div>
+    </a>
+  @endif --}}
+</div>

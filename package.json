@@ -1,0 +1,48 @@
+{
+  "name": "OCLOCK",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "sass": "node-sass src/resources/sass/app.scss src/public/css/style.css",
+    "watch:sass": "node-sass --watch src/resources/sass/app.scss src/public/css/style.css",
+    "sassFullcalendar": "node-sass src/resources/fullcalendar/fullcalendar.scss src/public/css/fullcalendar.css",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "bootstrap": "^4.5.3",
+    "connect-flash": "^0.1.1",
+    "connect-flash-plus": "^0.2.1",
+    "cookie-parser": "^1.4.5",
+    "csurf": "^1.11.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-handlebars": "^5.2.0",
+    "express-handlebars-sections": "^1.0.1",
+    "express-mysql-session": "^2.1.4",
+    "express-session": "^1.17.1",
+    "express-validator": "^6.6.1",
+    "jquery-steps": "^1.1.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.20",
+    "mailgun-js": "^0.22.0",
+    "memorystore": "^1.6.4",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.2.5",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "sequelize": "^6.3.5",
+    "sequelize-cli": "^6.2.0",
+    "serve-favicon": "^2.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}

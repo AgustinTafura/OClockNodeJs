@@ -1,0 +1,331 @@
+{{#section 'scripts'}}
+<script type="text/javascript" defer>
+
+
+  function getCategory(){
+    $.ajax({
+      url : "category",
+      // headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      type : 'GET',
+      success : function(res) {
+        $.each(res.categories, function(index,category){
+          $('#category_id').append(
+            "<option value="  + category.id + ">"   + category.name +  "</option>"
+          )
+        })
+      },
+      error : function(xhr, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+        alert('Disculpe, existió un problema con el Address. Intente más tarde');
+        window.history.go(-1)
+      },
+
+    });
+  }
+
+  function getCity(){
+    $.ajax({
+      url : "city",
+      // headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      type : 'GET',
+      success : function(resp) {             // la respuesta es pasada como argumento a la función // código a ejecutar si la petición es satisfactoria;
+
+        ({{login}} !== false)?authUserCity = [{{{user.Address.dataValues.CityId}}}]:authUserCity = [];
+
+        $.each(resp.cities, function(index,city){
+          let name = (city.Address.City.name).replace(/\b\w/g, l => l.toUpperCase())
+          let id= city.Address.City.id
+          if (typeof authUserCity[0] !== 'undefined' && authUserCity[0] === id) {
+            $('#city').append(
+              "<option selected id='"  + id + "' value='"  + name + "'>"   + name +  "</option>"
+            )
+          } else{
+            $('#city').append(
+            "<option id='"  + id + "' value='"  + name + "'>"   + name +  "</option>"
+            )
+          }
+        })
+      },
+      error : function(xhr, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+        alert('Disculpe, existió un problema. Intente más tarde');
+        window.history.go(-1)
+      }
+    });
+  }
+
+  function showSpecialties(value_category_id){
+    $.ajax({
+      url : "specialties/"+value_category_id,
+      type : 'GET',
+      success : function(resp) {
+        let specialties = resp.specialties
+        $.each(specialties, function(index,specialty){
+          $('#specialty_id').append(
+          "<option id='"  + specialty.name.replace(/ /g, "").toLowerCase() + "' value='"  + specialty.id + "'>"   + specialty.name +  "</option>"
+          )
+        })
+      },
+      error : function(xhr, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+        alert('Disculpe, existió un problema. Intente más tarde');
+        window.history.go(-1)
+      }
+    });
+  }
+
+
+  function datalistSearcher(element){
+    min = 1
+    max = 1000
+    if($('#specialty_id').children()[1]){
+      min = $('#specialty_id').children()[1].value
+      max = $('#specialty_id').children().last()[0].value
+    }
+
+    $.ajax({
+      url : "/dataProviderCompany",
+      type : 'get',
+      data : {   // la información a enviar
+        "name" : element.value,
+        "category_id" : $('#category_id')[0].value,
+        "specialty_id" :  $('#specialty_id')[0].value,
+        "category_id_min": min,
+        "category_id_max": max,
+      },
+      success : function(response) {             // la respuesta es pasada como argumento a la función // código a ejecutar si la petición es satisfactoria;
+
+        $.each(response.providers, function(index,provider){
+            $($('datalist')[0].children).each(function(i,dataLisOption){
+              if($(dataLisOption)[0].attributes.name.value == provider.id){
+                dataLisOption.remove()
+              }
+            })
+            $('datalist').append(
+            "<option name='" + provider.id + "' class='providers' value='" + provider.surname+ ',' +provider.name + "'>"+ provider.specialty + "</option>"
+          )
+        })
+        $.each(response.establishments, function(index,establishement){
+          console.log(establishement);
+          $($('datalist')[0].children).each(function(i,dataLisOption){
+            if($(dataLisOption)[0].attributes.name.value == establishement.id){
+              dataLisOption.remove()
+            }
+          })
+          $('datalist').append(
+            "<option  name='" + establishement.id + "'  class='companies' value='" + establishement.name + "'>"+ establishement.type + "</option>"
+          )
+        })
+        // $.each(response['neighborhood'], function(index,neighborhood){
+        //   $($('datalist')[0].children).each(function(i,dataLisOption){
+        //     if($(dataLisOption)[0].attributes.name.value == neighborhood.id){
+        //       dataLisOption.remove()
+        //     }
+        //   })
+        //   $('datalist').append(
+        //     "<option  name='" + neighborhood.id + "'  class='addresses' value='" + neighborhood.name + "'>"+ neighborhood.city + "</option>"
+        //   )
+        // })
+      },
+      error : function(xhr, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+      },
+      complete : function(xhr, status) {             // código a ejecutar sin importar si la petición falló o no
+
+      }
+    });
+  }
+
+  function removeChilds(element){
+    $.each($(element).children(),function(i, child){
+      if(child.value != 0)
+        child.remove()
+    });
+  }
+
+
+
+  $(function(){
+
+    $('#dateStart').css({'padding-right':'0'})
+
+    $('#input_datalist').on('keyup', function(e){
+      if (!e.keyCode ) {
+        if(key){
+          removeChilds($('datalist'))
+
+          key = 0
+        } else {
+          var key = 1;
+          return key
+        }
+      }
+        if (e.keyCode) {
+          removeChilds($('datalist'))
+        }
+       if (this.value.length >2) {
+        datalistSearcher(this)
+      } else {
+        removeChilds($('datalist'));
+      }
+      })
+
+    $('#datalist').prop('display', 'none');
+
+    $('form').submit(function(e){
+      e.preventDefault()
+      $.each($('#datalist').children(), function(index,option){
+        if (option.value == $( "#input_datalist")[0].value) {
+          classCat = option.attributes['class'].nodeValue
+          $('#input_datalist').attr('name', "input_datalist['" + classCat +"']")
+          id = $('#datalist').children()[index].attributes['name'].value
+          $('form').append(
+            "<input hidden id='id' name='id' value='" + id + "'> </input>"
+          )
+        }
+      })
+
+      if($('#specialty_id')[0].value > 0
+        || ("input_datalist['providers']" === $("#input_datalist")[0].attributes[0].nodeValue
+        || "input_datalist['companies']" === $("#input_datalist")[0].attributes[0].nodeValue
+        // || "input_datalist['addresses']" === $("#input_datalist")[0].attributes[0].nodeValue && $('#specialty')[0].value > 0
+      ))
+      {
+          this.submit()
+      } else {
+        ($('#category_id')[0].value > 0)?0:$('#category_id').focus();
+        ($('#specialty_id')[0].value > 0)?0:$('#specialty_id').focus();
+
+      }
+    })
+
+    $("#category_id").change(
+      function(){
+        var cat_id = $("#category_id")[0].value;
+
+        if(this.value != 0){
+          $("#specialty_id").removeAttr("disabled")
+          removeChilds($('#specialty_id'))
+          showSpecialties(cat_id)
+        } else{
+          $("#specialty_id")[0].value = "0"
+          $("#specialty_id").attr("disabled", "disabled")
+          $("#specialty_id").html("<option value='0' > Especialidad </option>")
+        }
+      }
+    )
+
+    getCity()
+    getCategory()
+    today = new Date(Date.now())
+    d = (today.getDate()<10)? "0" + today.getDate() : today.getDate()
+    m = (today.getMonth()<9)? "0" + (today.getMonth() + 1) : today.getMonth() + 1
+    y = today.getFullYear()
+    date = y + "-" + m + "-" + d
+    $('#dateStart').attr('min', date)
+    // $('#dateStart').attr('min', Date.now())
+
+    $('#specialty_id, #category_id').change(function(){
+      removeChilds($('datalist'))
+      $('#input_datalist')[0].value = ''
+    })
+
+
+    if ('{{{errors.emptySearch}}}' == true) {
+      $('#exampleModal').modal('show')
+      //
+      $('#exampleModal').on('hide.bs.modal', function (e) {
+        $('#category_id').val(dataForm.category_id);
+        $("#specialty_id").removeAttr("disabled")
+        showSpecialties($('#category_id').val())
+        $('#city').val(dataForm.city);
+        $('#category_id').val(dataForm.category_id);
+        $('#timeStart').val("dataForm.timeStart");
+        $('#timeEnd').val("dataForm.timeEnd");
+        $('#dateStart').val("dataForm.dateStart");
+      })
+
+      $('#exampleModal').on('hidden.bs.modal', function (e) {
+        $('#specialty_id').val(dataForm.specialty_id);
+      })
+    }
+
+  })
+</script>
+{{/section}}
+
+
+{{!-- <span hidden disabled id='id' value='@if (Auth::user()->address) {{Auth::user()->address->city}} @endif'></span>  {{-- Esta bien hacer esto para pasar obtener los datos en JS ?????? --}}
+
+{{#if errors.emptySearch}}
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header" style="background: palevioletred; color: white;">
+          <h5 class="modal-title" id="exampleModalLabel">  :( </h5>
+          {{!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close"> --}}
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          {{errors.emptySearch}}
+        </div>
+      </div>
+    </div>
+  </div>
+{{/if}}
+
+
+
+<form class="" action="search" method="post">
+  {{!-- csrf --}}
+  <div class="row">
+    <section class="col-12">
+      <select name="city" id="city" class=" form-control form-group form-group  col-md-5 {{#if errors.city}} is-invalid {{/if}}" value="{{#if dataForm.city}} {{dataForm.city}} {{/if}}">
+      </select>
+      <select name="category_id" id="category_id" class=" form-control form-group  col-md-5 {{#if errors.category_id}} is-invalid {{/if}}" value="{{#if dataForm.category_id}} {{dataForm.category_id}} {{/if}}">
+        <option value="0" class="titleCat"> Categoría </option>
+      </select>
+      <select disabled name="specialty_id" id="specialty_id" class="form-control form-group  col-md-5 {{#if errors.specialty_id}} is-invalid {{/if}}" name="specialty_id" value="{{#if dataForm.specialty_id}} {{dataForm.specialty_id}} {{/if}}">
+        <option value="0" class="titleCat"> Especialidad </option>
+      </select>
+      <label class="col-3 col-md-3 d-md-block "for="">Horario:</label>
+      <select name="timeStart" id="timeStart" class=" form-control form-group show-tick col-4 col-md-2 d-inline  timeStart {{#if errors.timeStart}} is-invalid {{/if}}"   autocomplete="" value="{{#if dataForm.timeStart}} {{dataForm.timeStart}} {{/if}}">
+        <option value='00:00:00'>00:00</option>
+        <option value='00:30:00'>00:30</option>
+        {{#for 1 23 1 }}
+          {{#if (lt this 10)}}
+            <option value='0{{this}}:00:00'>0{{this}}:00</option>
+            <option value='0{{this}}:30:00'>0{{this}}:30</option>
+          {{else}}
+            <option value='{{this}}:00:00'>{{this}}:00</option>
+            <option value='{{this}}:30:00'>{{this}}:30</option>
+          {{/if}}
+        {{/for}}
+      </select>
+      <select name="timeEnd" id="timeEnd" class=" form-control form-group show-tick col-4 col-md-2 d-inline  timeEnd {{#if errors.timeEnd}} is-invalid {{/if}}"   autocomplete="" value="{{#if dataForm.timeEnd}} {{dataForm.timeEnd}} {{/if}}">
+        <option value='23:59:00'>23:59</option>
+        {{#reverse_for 23 1 1 }}
+          {{#if (lt this 10)}}
+            <option value='0{{this}}:00:00'>0{{this}}:00</option>
+            <option value='0{{this}}:30:00'>0{{this}}:30</option>
+          {{else}}
+            <option value='{{this}}:00:00'>{{this}}:00</option>
+            <option value='{{this}}:30:00'>{{this}}:30</option>
+          {{/if}}
+        {{/reverse_for}}
+        <option value='00:30:00'>00:30</option>
+        <option value='00:00:00'>00:00</option>
+      </select>
+
+      <label class="col-6 col-md-3  d-md-block" for="">A partir del dia:</label>
+      <input type="date" name="dateStart" class="form-control form-group col-6 col-md-3 d-inline"  id="dateStart"  placeholder="2020-04-27" value="{{!-- {{date('Y-m-d')}} --}}">
+
+      <label class="col-3 col-md-3 d-flex" for="">Opcional:</label>
+      <input name="" id="input_datalist" list="datalist" class="form-control form-group show-tick col-md-5" placeholder="Nombre de Profesional o Clínica" autocomplete="off">
+      <datalist name='datalist' id="datalist">
+      </datalist>
+
+      <button type="submit" name="`submit"  class="btn btn-primary col-md-5 " >Buscar</button>
+
+    </section>
+
+
+  </div>
+</form>

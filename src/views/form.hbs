@@ -1,0 +1,1134 @@
+
+{{#section 'styles'}}
+  <link href="/jquery-steps/demo/css/jquery.steps.css" rel="stylesheet">
+{{/section}}
+
+{{#section 'scripts'}}
+
+  <script src="/jquery-steps/build/jquery.steps.js"></script> <!-- Script: JQUERY.STEPS -->
+  {{!-- // <script src="/jquery-steps/build/jquery.steps.min.js" ></script> <!-- Script: JQUERY.STEPS --> --}}
+  <script >
+
+    $(function(){
+
+      getCategory();
+      getStates();
+
+
+      // ------------------------------------------------------- Form-register Provider ------------------------------------------------------------------------//
+      $("#wizard").steps({
+        headerTag: "h2",
+        bodyTag: "section",
+        transitionEffect: "fade",
+        titleTemplate: "#title#",
+        onFinishing:  function (event, currentIndex){
+          return true
+        },
+        onFinished: function (event, currentIndex) {
+
+          $.when(
+          storeAddress()).then(
+          function(result){
+            console.log(result)
+              return storeEstablishment()
+          }).then(
+            function(result){
+              console.log(result)
+              return storeProvider()
+            }).then(
+            function(result){
+              console.log(result)
+              return storeBooking()
+            }).then(
+              function(result){
+                console.log(result)
+                console.log('submit');
+              // setTimeout($('form').submit(), 5000);
+              // return $('form').submit();
+            }, function(result){
+              console.log('ÉEEERROR', result);
+            }
+          )
+
+        },
+        onStepChanging: function (event, currentIndex, newIndex, title) {
+          //next
+          event.preventDefault();
+          if(currentIndex == 0 && newIndex == 1 ){
+              $('#wizard .actions li:last').addClass('disabled');
+            validateEstablishment();
+
+            next = true;
+            return next;
+          }
+
+          if(currentIndex == 1 && newIndex == 2 ){
+            next = true;
+            validateAddress();
+            getGoogleLatLng();
+            console.log('VALIDATE ADDRESS');
+            return (next,lat,lng);
+          }
+
+          if(currentIndex == 2 && newIndex == 3 ){
+              validateProvider();
+              console.log('lat',lat);
+              console.log('lng',lng);
+              console.log('VALIDATE PROVIDER');
+              next = true;
+            return next;
+          }
+
+          if(currentIndex == 3 && newIndex == 4 ){
+            validateBooking();
+            console.log('VALIDATE BOOKING');
+            next = true;
+            return next;
+          }
+
+          return true;
+        },
+      });
+
+
+      // Section - Horario apertura y cierre ------------------------------------------------------------------------
+      $.each($('.weekDay'), function(i,child){
+
+        $(this.children[1].firstElementChild).on('change', function(){
+          pivote = this.parentElement;
+          bttn = $(child.firstChild);
+
+          bttn.addClass('disabled');
+          $($(bttn)[0].firstChild).val('0');
+
+          if(this.value == 'closed') {
+            $.each($(pivote.children), function(i,child){
+              if(i != 0){
+                child.remove()
+              }
+                $(this).removeClass('col-5');
+                $(this).removeClass('open_hour');
+                $(this).addClass('col-12');
+                $(this).addClass('closedDay');
+            })
+          }
+
+          if(this.value != 'closed') {
+            bttn.removeClass('disabled');
+            $.each($(pivote.children), function(i,child){
+              if(i != 0){
+                child.remove()
+              }
+              $(this).removeClass('col-5');
+              $(this).addClass('open_hour');
+              $(this).addClass('col-12');
+              $(this).removeClass('closedDay');
+            })
+            $($(bttn)[0].firstChild).val('1');
+
+            if(this.value != '24hours') {
+              $(this).removeClass('col-12');
+
+              $(this).addClass('col-5');
+
+
+              if(pivote.childElementCount == 1){
+
+              $(this).after('<select  class=" form-control show-tick col-5 close_hour " required autocomplete=""> <option class="nullOption" value="" selected disabled>__ : __</option> <optgroup label="Horario cierre"> </optgroup></select>');
+              // $(pivote.children[1]).append('<option value="" selected disabled> _ _ : _ _  </option>');
+              for (var i = 0; i < 24; i++) {
+                if(i <10 ) {
+                 $option = "<option value='0" + i + ":00:00'>0" + i + ":00</option> <option value='0" + i + ":30:00'>0" + i + ":30</option>";
+               } else {
+                 $option = "<option value='" + i + ":00:00'>" + i + ":00</option> <option value='" + i + ":30:00'> " + i + ":30</option>";
+               }
+
+               $(pivote.children[1]).append($option);
+
+              }
+              // $id = child.classList[1] + 'close_hour';
+              $id = 'days' + child.classList[1] + 'close_hour0';
+              $name = 'days[' + child.classList[1] + '][close_hour][]';
+              $(pivote.children[1]).attr('name', $name);
+              $(pivote.children[1]).attr('id', $id);
+              $(pivote).append('<label class="col-1 add_shift">+</label>');
+              }
+            }
+
+            // BUTTON + ADD SHIFT
+            addBttn = $('.add_shift');
+            addBttn.on('click', function(e) {
+              e.preventDefault();
+
+              ident = $(this.parentElement)[0]
+              bttnOpen = $(this.parentElement)[0].children[0]
+              bttnClose = $(this.parentElement)[0].children[1]
+
+              dayO = bttnOpen.name;
+              dayC = bttnClose.name;
+              row = $(this.parentElement)[0].childElementCount;
+              row = (row/3);
+              dayORow = bttnOpen.id.replace("open_hour0", "open_hour"+row);
+              dayCRow = bttnClose.id.replace("close_hour0", "close_hour"+row);
+
+              bttOpenNew = $(bttnOpen).clone()
+              bttCloseNew = $(bttnClose).clone()
+
+              if(bttOpenNew.hasClass('is-invalid')){
+                bttOpenNew.removeClass('is-invalid')
+              }
+
+              if(bttCloseNew.hasClass('is-invalid')){
+                bttCloseNew.removeClass('is-invalid')
+              }
+
+
+              var nullOption = '<option hidden class="nullOption" value="" selected disabled>__ : __</option>'
+              bttOpenNew.append(nullOption)
+              bttOpenNew[0].firstChild.remove();
+              bttOpenNew[0].firstChild.remove();
+              bttOpenNew[0].firstChild.remove();
+              bttOpenNew[0][0].remove();
+              // console.log(bttOpenNew);
+              // console.log(bttOpenNew[0][0]);
+
+              bttOpenNew.attr('name', dayO)
+              bttCloseNew.attr('name', dayC)
+
+              bttOpenNew.attr('id', dayORow)
+              bttCloseNew.attr('id', dayCRow)
+
+              bttOpenNew.addClass(ident.id+row)
+              bttCloseNew.addClass(ident.id+row)
+
+
+              bttOpenNew.appendTo(this.parentElement)
+              bttCloseNew.appendTo(this.parentElement)
+              $(this.parentElement).append('<label class="col-1 remove_shift '+ident.id+row+'">-</label>')
+
+              // BUTTON + ADD SHIFT
+              removeBttn = $('.remove_shift');
+              removeBttn.on('click', function() {
+                classElementsToRemove = this.classList[2];
+                $.each($('.'+classElementsToRemove), function(i,element){
+                  this.remove();
+                })
+              })
+            })
+          }
+        })
+
+        //
+        $(this).change(function(e){
+
+          var element =  e.target;
+          var day = element.id.charAt(4);
+          var shift = element.id.charAt(element.id.length - 1);
+          var availabilityIndicator = e.currentTarget.children[0];
+          var timeOptions = $('.'+ day + ' select');
+          var errors = false;
+
+          switch(element.value) {
+            case 'closed':
+              $(availabilityIndicator).addClass('disabled');
+              break;
+            case '24hours':
+              $(availabilityIndicator).removeClass('disabled');
+              break;
+            default:
+
+            var timeEmpty = false;
+            $.each(timeOptions, function(i, option){
+              console.log($(option).val());
+              if($(option).val() === null){
+                timeEmpty = 1;
+                return false;
+              }
+            })
+            console.log("timeEmpty :", timeEmpty);
+            if(timeEmpty){
+              $(availabilityIndicator).addClass('disabled');
+            } else {
+              $(availabilityIndicator).removeClass('disabled');
+            }
+
+
+
+
+            if(element.id.includes('close_hour')){
+              openHourElement = $('#'+element.id.replace('close_hour', 'open_hour'));
+              openHourTime = Date.parse(new Date('1/1/1970 '+ openHourElement[0].value));
+              closeHourTime = Date.parse(new Date('1/1/1970 '+ element.value));
+              // console.log(openHourTime);
+              // console.log(closeHourTime);
+              if(closeHourTime <= openHourTime) {
+                errors = true;
+                msg = 'La hora de cierre del turno debe ser posterior la hora de apertura del mismo';
+                $(element).focus()
+                $(element).addClass('is-invalid')
+                $(element).attr('data-placement', 'top'),
+                $(element).attr('data-toggle', 'popover'),
+                $(element).attr('data-content', msg)
+                correctInputErrors()
+                $(element).css('padding-right','0');
+
+                $('.is-invalid').popover()
+                $('.is-invalid').popover({container: 'body'})
+                $('.is-invalid').popover('enable')
+              } else{
+                $(availabilityIndicator).removeClass('disabled');
+              }
+            }
+
+            if(element.id.includes('open_hour') && shift>0){
+              openHourTime = Date.parse(new Date('1/1/1970 '+ element.value));
+              closeHourElementBefore = $('#'+element.id.replace('open_hour'+shift, 'close_hour'+(shift-1)));
+              closeHourTimeBefore = Date.parse(new Date('1/1/1970 '+ closeHourElementBefore[0].value));
+              if(openHourTime < closeHourTimeBefore) {
+                errors = true;
+                msg = 'La hora de apertura del turno debe ser posterior la hora de cierre del turno anterior';
+                $(element).focus()
+                $(element).addClass('is-invalid')
+                $(element).attr('data-placement', 'top'),
+                $(element).attr('data-toggle', 'popover'),
+                $(element).attr('data-content', msg)
+                correctInputErrors()
+                $(element).css('padding-right','0');
+
+                $('.is-invalid').popover()
+                $('.is-invalid').popover({container: 'body'})
+                $('.is-invalid').popover('enable')
+              }
+            }
+          }
+
+          btnFinishAvailable  = false;
+          $.each($('.weekDay label.btn'), function(i,element) {
+
+            if(!$(element).hasClass('disabled') && !errors){
+              btnFinishAvailable  = false;
+              $('#wizard .actions li:last').removeClass('disabled');
+              return false;
+            }
+
+            $('#wizard .actions li:last').addClass('disabled');
+          });
+
+
+        })
+
+
+      })
+      //quitar Class  al ultimo Section
+      $(".well.well-sm.text-center.my-5").removeClass('my-5');
+
+      // -------------------------------------------------------  Events  ------------------------------------------------------------------------//
+
+      // $("#establishment_id").on('change',
+      //   function(){
+      //     $('#establishment_name').attr('hidden', 'true')
+      //     $('#establishment_name').removeAttr('required')
+      //     if(this.value >=1 ) {
+      //       $('#establishment_name').removeAttr('hidden')
+      //       $('#establishment_name').attr('required', 'true')
+      //     }
+      //   }
+      // );
+
+      $('#establishment_name').on('change', function(element){
+
+        var attr = $('#company_contact_phone').attr('disabled');
+
+        if (typeof attr !== typeof undefined && attr !== false){
+
+          $('#company_contact_phone').removeAttr('disabled')
+              $('#street_name').removeAttr('disabled')
+              $('#street_number').removeAttr('disabled')
+              $('#company_email').removeAttr('disabled')
+              $('#floor').removeAttr('disabled')
+              $('#apartment').removeAttr('disabled')
+              $('#zip').removeAttr('disabled')
+              $('#state').removeAttr('disabled')
+              $('#city').removeAttr('disabled')
+
+              $('#street_name').val('')
+              $('#street_number').val('')
+              $('#floor').val('')
+              $('#apartment').val('')
+              $('#zip').val('')
+              $('#state').val('')
+              $('#city').val('')
+              $('#company_email').val('')
+              $('#company_contact_phone').val('')
+        } else {
+
+          $.each($('datalist option'), function(i,opt){
+
+            if(this.value === opt.value){
+                address_id = this.attributes['address_id'].value
+                company_id = this.attributes['company_id'].value
+                getCompanyById(company_id)
+                getAddressById(address_id)
+            }
+          })
+        }
+
+      })
+
+      $('section.companyForm select, section.companyForm input').change(
+        function(){
+          updateCompany = 1
+
+        }
+      )
+
+      $('section.addressForm select, section.addressForm input').change(
+        function(){
+          updateAddress = 1
+        }
+      )
+
+
+      $("#category_id").change(
+        function(){
+          // $('#license_number').attr('hidden', 'true')
+          var cat_id = $("#category_id")[0].value;
+          $('#license_number').attr('hidden', 'true')
+          if(this.value != 0){
+            $.each($('#establishment_id').children(),function(i, child){
+              if(child.value != 0){
+                child.remove()
+              }
+            })
+            $.each($('#specialty_id').children(),function(i, child){
+              if(child.value != 0){
+                child.remove()
+              }
+            })
+            $("#specialty_id").removeAttr("disabled")
+            $("#establishment_id").removeAttr("disabled")
+            showSpecialties(cat_id)
+            showEstablishments(cat_id)
+            if(this.value <= 2){
+              $('#license_number').removeAttr('hidden')
+              $('#license_number').attr('required', 'true')
+            }
+          } else{
+            $("#specialty_id")[0].value = "0"
+            $("#specialty_id").attr("disabled", "disabled")
+            $("#specialty_id").html("<option value='0' > Especialidad </option>")
+            $("#establishment_id").attr("disabled", "disabled")
+            $.each($('#establishment_id').children(),function(i, child){
+              if(child.value != 0){
+                child.remove()
+              }
+            })
+            // $('#establishment_name').attr('hidden', 'true')
+            // $('#establishment_name')[0].value = ""
+          }
+        }
+      )
+
+
+      $('#establishment_name').on('keyup', function(e){
+
+        if (!e.keyCode ) {
+          if(key){
+            removeChilds($('datalist'))
+            key = 0
+          } else {
+            var key = 1;
+            return key
+          }
+        }
+        if (e.keyCode) {
+          removeChilds($('datalist'))
+        }
+        if (this.value.length >2 && ($('#establishment_id')[0].value == 4 || $('#establishment_id')[0].value == 2) ) {
+          datalistSearcher(this)
+        } else {
+
+          removeChilds($('datalist'));
+        }
+      })
+
+      $('#city').on('keyup', function(e){
+
+        if (this.value.length >2 && e.keyCode){
+          removeChilds($('#datalistCity'));
+          getCitiesByState();
+        }
+      })
+    // -------------------------------------------------------  END - Events  ------------------------------------------------------------------------//
+    })
+    // ------------------------------------------------------- END Form-register Provider ------------------------------------------------------------------------//
+    // -------------------------------------------------------  Functions  ------------------------------------------------------------------------//
+    function getCompanyById(id){
+      return $.ajax({
+          // async: 'false',
+          url : "/company/get/"+id,
+          headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          type : 'GET',
+          success : function(response) {             // la respuesta es pasada como argumento a la función // código a ejecutar si la petición es satisfactoria;
+            $('#company_contact_phone').val(response.contact_phone)
+            $('#company_contact_phone').attr('disabled', 'disabled')
+            $('#company_email').val(response.email)
+            $('#company_email').attr('disabled', 'disabled')
+          },
+          error : function(response, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+          },
+        })
+    }
+
+    function getAddressById(id){
+      // var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+      return $.ajax({
+          // async: 'false',
+          url : "/address/get/"+id,
+          headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          type : 'GET',
+          success : function(response) {             // la respuesta es pasada como argumento a la función // código a ejecutar si la petición es satisfactoria;
+
+            $('#street_name').val(response.street)
+            $('#street_name').attr('disabled', 'disabled')
+            $('#street_number').val(response.number)
+            $('#street_number').attr('disabled', 'disabled')
+            $('#floor').val(response.floor)
+            $('#floor').attr('disabled', 'disabled')
+            $('#apartment').val(response.apartment)
+            $('#apartment').attr('disabled', 'disabled')
+            $('#zip').val(response.postal_code)
+            $('#zip').attr('disabled', 'disabled')
+            $('#state').val(response.state)
+            $('#state').attr('disabled', 'disabled')
+            $('#city').val(response.city)
+            $('#city').attr('disabled', 'disabled')
+          },
+          error : function(response, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+          },
+        })
+    }
+
+    function removeChilds(element){
+      $.each($(element).children(),function(i, child){
+        if  (child.value != 0){
+          child.remove()
+        }
+      });
+    }
+
+    function datalistSearcher(element){
+      var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+      min = 1
+      max = 1000
+      if($('#specialty_id').children()[1]){
+        min = $('#specialty_id').children()[1].value
+        max = $('#specialty_id').children().last()[0].value
+      }
+
+      $.get({
+        url : "/dataEstablishments",
+        data : {   // la información a enviar
+          "name" : element.value,
+          "category_id" : $('#category_id')[0].value,
+          "specialty_id" :  $('#specialty_id')[0].value,
+          // "category_id_min": min,
+          // "category_id_max": max,
+        },
+        success : function(response) {             // la respuesta es pasada como argumento a la función // código a ejecutar si la petición es satisfactoria;
+          $.each(response.establishments, function(index,company){
+            $($('datalist')[0].children).each(function(i,dataLisOption){
+              if($(dataLisOption)[0].attributes.name.value == company.id){
+                dataLisOption.remove()
+              }
+            })
+            $('datalist').append(
+              "<option company_id='" + company.id + "' name=company_id' address_id='" + company.addressId + "'  class='companies' value='" + company.name + "'>"+ company.street +" "+ company.number + "</option>"
+            )
+          })
+
+        },
+        error : function(xhr, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+        },
+        complete : function(xhr, status) {             // código a ejecutar sin importar si la petición falló o no
+        }
+      });
+    }
+
+
+    function getGoogleLatLng() {
+      var addressComplete = $('#street_name')[0].value + " " + $('#street_number')[0].value +', ' + $('#city')[0].value +', ' + $('#country')[0].value;
+     return $.get('https://maps.googleapis.com/maps/api/geocode/json?',
+      {
+        address: addressComplete, key: 'AIzaSyCveMczcJsme8vew0YXARS70KKZ5rVFdAc'
+      })
+      .done(function(data){
+        lat = data.results[0].geometry.location.lat;
+        lng = data.results[0].geometry.location.lng;
+        return (lat,lng)
+      })
+    };
+
+     function storeAddress(){
+      var cityId =  cityIdSelected()
+
+        return $.post({
+          url : "/address/store",
+          data : {   // la información a enviar
+            street_name : $('#street_name')[0].value,
+            street_number : $('#street_number')[0].value,
+            floor : $('#floor')[0].value,
+            apartment : $('#apartment')[0].value,
+            cityId:  cityId,
+            zip : $('#zip')[0].value,
+            city : $('#city')[0].value,
+            lat: lat,
+            lng: lng,
+            // "state" : $('#state')[0].value,
+            "country" : $('#country')[0].value,
+          },
+          success : function(response) {             // la respuesta es pasada como argumento a la función // código a ejecutar si la petición es satisfactoria;
+            console.log('STORE ADDRESS');
+            newAddressId = response
+            return newAddressId
+          },
+          error : function(response, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+            alert('error al crear la ADDRESS')
+            console.log(response);
+            console.log(status);
+          },
+        })
+      // })
+    }
+
+    function storeEstablishment(){
+      // addresId = {{{storeEstablishment}}}
+      // console.log('jajs',addresId, 'akjskdj');
+
+        return $.post({
+          url : "/establishment/store",
+          data : {   // la información a enviar
+            name : $('#establishment_name')[0].value,
+            verify: 0,
+            // address_id : 0,
+            // cuit : $('#cuit')[0].value,
+            company_contact_phone : $('#company_contact_phone')[0].value,
+            company_email : $('#company_email')[0].value,
+            category_id : $('#category_id')[0].value,
+            establishment_id : $('#establishment_id')[0].value,
+          },
+          // type : 'GET',
+          // async: 'false',
+          success : function(response) {             // la respuesta es pasada como argumento a la función // código a ejecutar si la petición es satisfactoria;
+            console.log('STORE ESTABLISHMENT');
+            newCompanyId = response
+            return newCompanyId
+          },
+          error : function(response, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+          // alert('error al crear la COMPANY')
+          },
+          complete : function(xhr, status) {             // código a ejecutar sin importar si la petición falló o no
+          }
+        })
+      };
+
+
+    function storeProvider(){
+
+      return $.post({
+        url : "/provider/store",
+        data : {   // la información a enviar
+          "cuit" : $('#cuit')[0].value,
+          "license_number" : $('#license_number')[0].value,
+          "contact_phone": $('#company_contact_phone')[0].value,
+          "specialty_id" :  $('#specialty_id')[0].value,
+        },
+        // dataType : 'json',            // el tipo de información que se espera de respuesta
+        success : function(response) {             // la respuesta es pasada como argumento a la función // código a ejecutar si la petición es satisfactoria;
+        console.log('STORE PROVIDER');
+          newProviderId = response;
+          return newProviderId
+        },
+        error : function(response, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+          alert('error al crear el PROVIDER')
+        },
+      });
+    }
+
+    function storeBooking(){
+
+      var days = [];
+      $.each($('#wizard-p-4 .weekDay>label' ),function(i,e) {
+
+          if(!$(e).hasClass('disabled')) {
+              days[i] = {'open_hour':[],'close_hour':[]}
+          }
+      })
+
+        $.each($('#wizard-p-4 select' ), function(i,e) {
+          if(!$(e).hasClass('closedDay')){
+            console.log(2, days);
+            if($(e).val() == '24hours') {
+              var day = $(e)[0].id.charAt(4)
+              days[day]['open_hour'].push($(e).val())
+              days[day]['close_hour'].push($(e).val())
+            } else {
+              var day = $(e)[0].id.charAt(4)
+              var shift = ($(e).hasClass('open_hour'))?"open_hour":"close_hour";
+              days[day][shift].push($(e).val())
+            }
+          }
+        })
+
+      return $.post({
+        url : "/booking/store",
+        data : {   // la información a enviar
+          // "days" : ,
+          "appointmentDuration" :  $('#appointment_duration').val(),
+          "dateStart" : $('#date_start').val(),
+          "status_id": 1,
+          "service_id": 1,
+          "days": days,
+        },
+        success : function(response) {             // la respuesta es pasada como argumento a la función // código a ejecutar si la petición es satisfactoria;
+          console.log('STORE BOOKING');
+          newBooking = response
+          return newBooking
+        },
+        error : function(xhr, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+          alert('error al crear el BOOKINGS')
+        },
+
+      });
+    }
+
+    function showSpecialties(category_id) {
+      $.ajax({
+        url: "/specialties/"+category_id,
+        type:'get',
+        success: function(resp) {
+          let specialties = resp.specialties
+          $.each(specialties, function(index,specialty){
+            $('#specialty_id').append(
+            "<option id='"  + specialty.name.replace(/ /g, "").toLowerCase() + "' value='"  + specialty.id + "'>"   + specialty.name +  "</option>"
+            )
+          })
+        }
+      })
+    //   var xhttp;
+    //   xhttp = new XMLHttpRequest();
+    //   xhttp.onreadystatechange = function() {
+    //     if (this.readyState == 4 && this.status == 200) {
+    //       document.getElementById("specialty_id").innerHTML = this.responseText;
+    //     }
+    //   };
+    //   xhttp.open("GET", "/getspecialties/"+value_category_id, true);
+    //   xhttp.send();
+    }
+
+    $("#specialty_id").change(
+      function(){
+        element_id = $("#specialty_id")[0].value;
+          showOptions(element_id)
+      }
+    )
+
+    function showEstablishments(category_id) {
+      $.ajax({
+        url : "/establishmentsType/",
+        type : 'GET',
+        data: {
+          'category_id': category_id
+        },
+        success : function(resp) {
+        const establishmentTypes = resp.establishmentTypes;
+            $.each(establishmentTypes, function(i, service){
+              $('#establishment_id').append(
+                "<option value="  + service.id + ">"   + service.name +  "</option>"
+              )
+            })
+        },
+        error : function(xhr, status) {
+            alert('Disculpe, existió un problema. Intente más tarde');
+        },
+      });
+    }
+
+    function showOptions(element_id) {
+      $.ajax({
+        url : "/getservices/"+element_id,
+        type : 'GET',
+        success : function(services) {
+          $('#checkbox_service').empty();
+          if (services.length == '0') {
+          } else {
+            $.each(services, function(i, service){
+              $('#checkbox_service').append(
+                "<div class='funkyradio-warning'> <input type='checkbox' name='service_id_[]' id='service_id_"  + service.id + "' value='"  + service.id + "' /> <label for='service_id_"  + service.id + "'> "  + service.name + " </label> </div>"
+              )
+            })
+          }
+        },
+        error : function(xhr, status) {
+            alert('Disculpe, existió un problema. Intente más tarde');
+        },
+      });
+
+    }
+
+    function getCategory(){
+      $.ajax({
+        url : "/category",
+        // headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        type : 'GET',
+        success : function(res) {
+          $.each(res.categories, function(index,category){
+            $('#category_id').append(
+              "<option value="  + category.id + ">"   + category.name +  "</option>"
+            )
+          })
+        },
+        error : function(xhr, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+          alert('Disculpe, existió un problema con el Address. Intente más tarde');
+          // window.history.go(-1)
+        },
+
+      });
+    }
+
+    function getStates(){
+      $.ajax({
+        url : "/states",
+        type : 'GET',
+        success : function(res) {
+          $.each(res.states, function(index,state){
+            $('#state').append(
+              "<option value="  + state.id + ">"   + state.name +  "</option>"
+            )
+          })
+        },
+        error : function(xhr, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+          console.log(status);
+          console.log(xhr);
+          alert('Disculpe, existió un problema con el Address. Intente más tarde');
+          // window.history.go(-1)
+        },
+
+      });
+    }
+
+    function getCitiesByState(){
+      $.ajax({
+        url : "/getCitiesByState",
+        // headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        data: {
+          stateId:$('#state').val(),
+          limit: 5,
+          name: $('#city').val()
+        },
+        type : 'GET',
+        success : function(res) {
+          $.each(res.cities, function(index,city){
+            $('#datalistCity').append(
+              "<option id="  + city.id + ">"   + city.name +  "</option>"
+            )
+          })
+        },
+        error : function(xhr, status) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+          // alert('Disculpe, existió un problema con el Address. Intente más tarde');
+          // window.history.go(-1)
+        },
+
+      });
+    }
+
+
+    function checkCurrenSectiontRequired(){
+      $.each($("section.current .required"), function(i, child){
+        if(this.value == 0) {
+          $(function() {
+            $(child).focus()
+          })
+          next = false
+        }
+      })
+    }
+
+    function correctInputErrors(){
+      $.each($('.is-invalid'),function(index,el){
+        $(el).change(
+          function(){
+            $(this).removeClass('is-invalid')
+            $(this).popover('hide')
+            $(this).popover('disable')
+
+            stepWarningColor = ($(this).parents('section').get(0).id).replace('-p-','-t-')
+            $("#" + stepWarningColor).css("background-color", "");
+          }
+        )
+        $(el).focusout(function(){
+          $(this).popover('hide')
+        })
+
+      })
+    }
+
+    function showErrorsvalidation(response){
+      $.each(response.responseJSON, function(error,msg){
+
+        var element = $(document).find('[name="'+error+'"]');
+        if(!element.length){
+          var element =  $(document).find("#"+error);
+        }
+        var step = $(element).parents('section').get(0).id;
+        stepId = step.replace('-p-','-t-')
+
+        $("#" + stepId).get(0).click()
+        $("#" + stepId).get(0).style.backgroundColor = 'palevioletred'
+        $(element).focus()
+        $(element).addClass('is-invalid')
+        $(element).attr('data-content', msg)
+        correctInputErrors()
+
+      })
+      $('.is-invalid').popover({container: 'body'})
+      $('.is-invalid').popover('enable')
+
+    }
+
+    function cityIdSelected(){
+      id = 40523;
+      $.each($('#datalistCity option'), function(i, el){
+        if (el.value === $('#city').val()) {
+          id = el.id
+          return id
+        }
+      })
+      return id
+    }
+
+    function validateAddress(){
+
+        return $.get('address/validation', {
+        street_name: $('#street_name').get(0).value,
+        street_number: $('#street_number').get(0).value,
+        floor: $('#floor').get(0).value,
+        apartment: $('#apartment').get(0).value,
+        zip: $('#zip').get(0).value,
+        cityId:  cityIdSelected(),
+        state: $('#state').get(0).value,
+        country: "Argentina",
+      // }, function(data, estado, xhr){
+      }).fail(function(data) {
+        return showErrorsvalidation(data);
+        errors = [data.responseJSON]
+      })
+    }
+
+    function validateEstablishment(){
+        return $.get('establishment/validation', {
+        establishment_name: $('#establishment_name').get(0).value,
+        cuit: $('#cuit').get(0).value,
+        // address_id: $('#address_id'),
+        company_contact_phone: $('#company_contact_phone').get(0).value,
+        company_email: $('#company_email').get(0).value,
+        category_id: $('#category_id').get(0).value,
+        establishment_id: $('#establishment_id').get(0).value,
+      // }, function(data, estado, xhr){
+      }).fail(function(data) {
+        return showErrorsvalidation(data);
+        errors = [data.responseJSON]
+
+      })
+    }
+
+    function validateProvider(){
+      if($('#license_number')[0].hasAttribute('hidden')){
+
+      }
+        return $.get('validation', {
+        cuit : $('#cuit').get(0).value,
+        license_number : $('#license_number').get(0).value,
+        license_number_required: !$('#license_number')[0].hasAttribute('hidden'),
+        // 'user_id',
+        // 'company_id',
+        specialty_id: $('#specialty_id').get(0).value,
+      // }, function(data, estado, xhr){
+      }).fail(function(data) {
+        return showErrorsvalidation(data);
+        errors = [data.responseJSON]
+
+      })
+    }
+
+    function validateBooking(){
+      var days = new Array()
+      for (var i = 0; i < 7; i++) {
+        days.push({'open_hour':[],'close_hour':[]})
+      }
+      $("select[name^='days").each(function(){
+        index = this.name.charAt(5);
+        if($(this).hasClass('open_hour')){
+          if(this.value == 'closed' || this.value == '24hours' ){
+            days[index]["open_hour"] = this.value
+          } else{
+            days[index]["open_hour"].push(this.value)
+          }
+        } else if($(this).hasClass('close_hour')) {
+          days[index]["close_hour"].push(this.value)
+        }
+      })
+       return $.get('/booking/validation', {
+        dataDays : days,
+        appointment_duration: $('#appointment_duration').get(0).value,
+        date_start: $('#date_start').get(0).value,
+      // }, function(data, estado, xhr){
+      //   return true;
+      }).fail(function(data) {
+        showErrorsvalidation(data);
+        errors = [data.responseJSON]
+        return data
+      })
+    }
+
+
+    // function validateBooking(){
+    //   var str = $( "form" ).serializeArray();
+    //   var postData = new FormData();
+    //   $.each(str, function(i, val) {
+    //       postData.append(val.name, val.value);
+    //   })
+    //   var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+    //   return $.ajax({
+    //     url: '/booking/validation',
+    //     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+    //     data : {
+    //       _token: $('meta[name="csrf-token"]').attr('content'),
+    //       data : postData,
+    //     },
+    //     contentType: false,
+    //     type: 'POST',
+    //     processData: false,
+    //     success : function(data, estado, xhr) {
+
+    //     },
+    //     error : function(data, estado, xhr) { // código a ejecutar si la petición falla;// son pasados como argumentos a la función // el objeto de la petición en crudo y código de estatus de la petición
+
+    //       showErrorsvalidation(data)
+    //     },
+    //   })
+    // }
+  </script>
+{{/section}}
+
+
+  <form class="" action='/booking' method="POST">
+    {{!-- csrf --}}
+      <div id="wizard">
+
+          <h2>Establecimiento</h2>
+          <section class="companyForm">
+            <select name="category_id" id="category_id" class=" form-control form-group show-tick col-md-4 required " name="category_id" value="{{#if dataForm.category_id}} {{dataForm.category_id}} {{/if}}"  autocomplete="category_id" >
+            <option value="0" class="titleCat"> Categoría </option>
+            </select>
+            <select  disabled name="establishment_id" id="establishment_id" class=" form-control form-group show-tick col-md-4 required " name="establishment_id" value="{{#if dataForm.establishment_id}} {{dataForm.establishment_id}} {{/if}}" required autocomplete="establishment_id" >
+              <option value="0"> Tipo de Establecimiento </option>
+            </select>
+            <input type='text' list="datalist" class='form-control form-group  show-tick col-md-4 required' value='{{#if dataForm.establishment_name}} {{dataForm.establishment_name}} {{/if}}'  autocomplete='establishment_name'  id='establishment_name' name='establishment_name' placeholder='Nombre del Establecimiento' data-placement="top" data-toggle="popover">
+            <datalist name='datalist' id="datalist"></datalist>
+            <input type="text" class="form-control form-group  show-tick col-md-4 required " id="company_contact_phone" name="company_contact_phone" placeholder="Numero de teléfono" value="{{#if dataForm.company_contact_phone}} {{dataForm.company_contact_phone}} {{/if}}" required data-placement="top" data-toggle="popover">
+            <input type="email" class="form-control form-group  show-tick col-md-4 required " id="company_email" name="company_email" placeholder="Email del Establecimiento" value="{{#if dataForm.company_email}} {{dataForm.company_email}} {{/if}}" required data-placement="top" data-toggle="popover">
+          </section>
+
+          <h2>Direccion</h2>
+          <section class="addressForm">
+            <input type="text" class="form-control form-group col-12 col-md-8 required" value="{{#if dataForm.street_name}} {{dataForm.street_name}} {{/if}}" required autocomplete="street_name" id="street_name" name="street_name" placeholder="Calle" data-placement="top" data-toggle="popover">
+            <input type="text" class="form-control form-group col-6 col-md-4 required" value="{{#if dataForm.street_number}} {{dataForm.street_number}} {{/if}}"  autocomplete="street_number"  id="street_number" name="street_number" placeholder="Numero" data-placement="top" data-toggle="popover">
+            <input type="text" class="form-control form-group col-6 col-md-4" value="{{#if dataForm.floor}} {{dataForm.floor}} {{/if}}" id="floor" name="floor" placeholder="Piso" data-placement="top" data-toggle="popover"  data-content=" It's very engaging. Right?">
+            <input type="text" class="form-control form-group col-6 col-md-4" value="{{#if dataForm.apartment}} {{dataForm.apartment}} {{/if}}" id="apartment" name="apartment" placeholder="Depto" data-placement="top" data-toggle="popover">
+            <input type="text" class="form-control form-group col-6 col-md-4 required"value="{{#if dataForm.zip}} {{dataForm.zip}} {{/if}}" required autocomplete="zip"  id="zip" name="zip" placeholder="Codigo Postal" data-placement="top" data-toggle="popover">
+            {{!-- <input type="text" class="form-control form-group col-md-4 required" value="{{#if dataForm.state}} {{dataForm.state}} {{/if}}" required autocomplete="state"  id="state" name="state" placeholder="Provincia" data-placement="top" data-toggle="popover"> --}}
+
+            <select name="state" id="state" class=" form-control form-group show-tick col-md-4 required d-inline-flex" value="{{#if dataForm.state}} {{dataForm.state}} {{/if}}" required autocomplete="state"  id="state" name="state" placeholder="Provincia" data-placement="top" data-toggle="popover" autocomplete="state" >
+            <option value="0" class="titleCat"> Provincia </option>
+            </select>
+
+
+            {{!-- <input type='text' list="datalist" class='form-control form-group  show-tick col-md-4 required' value='{{#if dataForm.establishment_name}} {{dataForm.establishment_name}} {{/if}}'  autocomplete='establishment_name'  id='establishment_name' name='establishment_name' placeholder='Nombre del Establecimiento' data-placement="top" data-toggle="popover">
+            <datalist name='datalist' id="datalist"></datalist> --}}
+
+
+            <input type="text" list="datalistCity" class="form-control form-group col-md-4 required" value="{{#if dataForm.city}} {{dataForm.city}} {{/if}}" required autocomplete="city"  id="city" name="city" placeholder="Ciudad" data-placement="top" data-toggle="popover" placeholder='Ciudad'>
+            <datalist name='datalistCity' id="datalistCity"></datalist>
+
+
+            <input type="text" class="form-control form-group col-md-4" value='Argentina' hidden  required autocomplete="country"  id="country" name="country" placeholder="Pais" data-placement="top" data-toggle="popover">
+          </section>
+
+
+          <h2>Area</h2>
+          <section class="areaForm">
+              <select disabled name="specialty_id" id="specialty_id" class="form-control form-group show-tick col-md-4 required" name="specialty_id" value="{{#if dataForm.specialty_id}} {{dataForm.specialty_id}} {{/if}}" required autocomplete="specialty_id" data-placement="top" data-toggle="popover">
+              <option value="0" class="titleCat"> Especialidad </option>
+              </select>
+              <input type='text' class='form-control form-group show-tick col-md-4' id='license_number' name='license_number' placeholder='Numero de Matrícula' value='{{#if dataForm.license_number}} {{dataForm.license_number}} {{/if}}' hidden data-placement="top" data-toggle="popover">
+                <input type="number" class=" form-control  show-tick col-md-4 required" id="cuit" name="cuit" placeholder="CUIT" value="{{#if dataForm.cuit}} {{dataForm.cuit}} {{/if}}" required data-placement="top" data-toggle="popover">
+          </section>
+
+          <h2>Servicio</h2>
+          <section class="serviceForm">
+              <h5>Indica la duracion de cada turno </h5>
+              <select class="form-control form-group show-tick col-md-4 required" name="appointment_duration" value="{{#if dataForm.appointment_duration}} {{dataForm.appointment_duration}} {{/if}}" id="appointment_duration" data-placement="top" data-toggle="popover">
+                <option value="" selected disabled>Seleccionar</option>
+                <optgroup label="______________">
+                <option value="5">5 Minutos</option>
+                <option value="10">10 Minutos</option>
+                <option value="15">15 Minutos</option>
+                <option value="20">20 Minutos</option>
+                <option value="30">30 Minutos</option>
+                <option value="60">1 Hora</option>
+              </optgroup>
+              </select>
+              <h5>Indica que dia comienzan tus turnos</h5>
+                <input type="date" class="form-control col-md-4 required" name="date_start" value="{{#if dataForm.date_start}} {{dataForm.date_start}} {{/if}}" id="date_start" data-placement="top" data-toggle="popover">
+            {{!-- <h5>Selecciona todos los servicios que prestes </h5>
+            <div class="funkyradio" id="checkbox_service">
+            </div> --}}
+          </section>
+
+          <h2>Horario</h2>
+          <section class="scheduleForm" id="scheduleForm" >
+              <div class="well well-sm text-center my-5">
+                  <h6>Elije tus dias y horarios disponibles</h6>
+                  <div class="btn-group" data-toggle="buttons">
+                    {{#each weekDays}}
+                      <div class="weekDay {{@key}} {{  this }}">
+                        <label class="btn btn-primary col-2 disabled">
+                          <input type="text" id="{{ this }}" name="days[{{@key}}][open]" value="0" hidden data-placement="top" data-toggle="popover">
+                          <div class="">
+                            <span>{{#substr this 0 3}}this{{/substr}}</span>
+                          </div>
+                        </label>
+                        <div id="{{@key}}" class="{{@key}}Schedule  col-10 row">
+                        <select name="days[{{@key}}][open_hour][]" id="days{{@key}}open_hour0" class=" form-control show-tick col-12 closedDay"  required autocomplete="" data-placement="top" data-toggle="popover">
+                            <option value="closed" > Closed </option>
+                            <option value="24hours"> 24 Horas </option>
+                          <optgroup label="Horario apertura"></optgroup>
+                          <option value='00:00:00'>00:00</option> <option value='00:30:00'>00:30</option>
+                          {{#for 1 24 1}}
+                            {{#if (lt this 10)}}
+                              <option value='0{{this}}:00:00'>0{{this}}:00</option> <option value='0{{this}}:30:00'>0{{this}}:30</option>
+                            {{else}}
+                              <option value='{{this}}:00:00'>{{this}}:00</option> <option value='{{this}}:30:00'> {{this}}:30</option>
+                            {{/if}}
+                          {{/for}}
+
+                        </select>
+                        </div>
+                      </div>
+                    {{/each}}
+                  </div>
+              </div>
+          </section>
+      </div>
+  </form>

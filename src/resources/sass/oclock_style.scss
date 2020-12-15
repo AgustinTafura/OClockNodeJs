@@ -1,0 +1,640 @@
+/*------------------------------------------------------------------ Body ------------------------------------------------------------------------------------*/
+
+body {
+  height: 100vh;
+}
+
+
+/*------------------------------------------------------------------ END - Body ------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------ Nav ------------------------------------------------------------------------------------*/
+
+nav {
+  // background-color: #525575;
+  background-color: #383a4f;
+  height: auto;
+
+  div.container a.navbar-brand {
+    color: white;
+    &:hover {
+      // color:  white;
+      color:palevioletred;
+      transform: scale(1.2);
+    }
+  }
+
+  .nav-link {
+    color: white  !important;
+    &:hover {
+      // color: #eb6649  !important;
+      transform: scale(1.2);
+      width: fit-content;
+    }
+  }
+}
+/*------------------------------------------------------------------ End Nav ------------------------------------------------------------------------------ */
+
+/*------------------------------------------------------------------  MAIN ------------------------------------------------------------------------------ */
+main {
+  &.py-4 {
+      // height: 84vh;
+  }
+}
+
+.container-fluid {
+  padding-right: inherit;
+  padding-left: inherit;
+}
+
+
+/*------------------------------------------------------------------ End MAIN ------------------------------------------------------------------------------ */
+
+
+/* ---------------------------------------------------------------------Footer ---------------------------------------------------------------------------------------*/
+footer {
+  display: flex;
+  align-items: center;
+  text-align: -webkit-center;
+  justify-content: center;
+  height: 7.5vh;
+  background-color: #55e8d5;
+
+
+
+  div {
+    display: flex;
+  }
+
+  img.social-media-icon {
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-right: 0.15rem;
+    margin-left: 0.15rem;
+  }
+
+  .buttonlink-footer {
+    color: black;
+    justify-content: center;
+    place-content: center;
+    font-weight: bold;
+  }
+
+
+  #social-media {
+    border-left: solid;
+    border-right: solid;
+
+  }
+
+}
+/*----------------------------------------------------- ------------End Footer ----------------------------------------------------------------------------------- */
+
+/*----------------------------------------------------- ---------Checkbox Provider Form ----------------------------------------------------------------------- */
+.funkyradio {
+
+
+    overflow: auto;
+    height: 60%;
+
+
+    div {
+        clear: both;
+        overflow: hidden;
+        display: flex;
+    }
+
+    h5 {
+      background-color: #777;
+    }
+
+    label {
+        width: 100%;
+        border-radius: 3px;
+        border: 1px solid #D1D3D4;
+        font-weight: normal;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+        visibility: hidden;
+        height: 0;
+        width: 0;
+
+        &:empty {
+            display: none;
+
+            ~ label {
+                position: relative;
+                line-height: 2.5em;
+                text-indent: 3.25em;
+                // margin-top: 2em;
+                cursor: pointer;
+                user-select: none;
+
+                &:before {
+                    position: absolute;
+                    display: block;
+                    top: 0;
+                    bottom: 0;
+                    left: 0;
+                    content: '';
+                    width: 2.5em;
+                    background: #D1D3D4;
+                    border-radius: 3px 0 0 3px;
+                }
+            }
+        }
+
+        &:hover:not(:checked) ~ label {
+            color: #888;
+
+
+            &:before {
+                content: '\2714';
+                text-indent: .9em;
+                color: #C2C2C2;
+            }
+        }
+
+        &:checked ~ label {
+            color: #777;
+
+            &:before {
+                content: '\2714';
+                text-indent: .9em;
+                color: #333;
+                background-color: #ccc;
+            }
+        }
+
+        &:focus ~ label:before {
+            box-shadow: 0 0 0 3px #999;
+        }
+    }
+
+    &-success {
+        input[type="radio"],
+        input[type="checkbox"] {
+            &:checked ~ label:before {
+                color: #fff;
+                background-color: #5cb85c;
+            }
+        }
+    }
+
+    &-warning {
+        input[type="radio"],
+        input[type="checkbox"] {
+            &:checked ~ label:before {
+                color: #fff;
+                background-color: #f0ad4e;
+            }
+        }
+    }
+
+
+
+}
+
+option.titleCat, select.titleCat {
+  font-weight: bold;
+}
+/*----------------------------------------------------- END - Checkbox Provider Form ----------------------------------------------------- */
+/*-----------------------------------------------------  Service Provider Form ----------------------------------------------------- */
+section.serviceForm {
+  div {
+    &.firstBox {
+      margin-bottom: 25px;
+    }
+  }
+}
+
+/*----------------------------------------------------- END - Service Provider Form ----------------------------------------------------- */
+
+/*----------------------------------------------------- Addres Provider Form ----------------------------------------------------- */
+
+section.addressForm.body {
+
+    display: inline-table;
+
+  div {
+    display: inline-flex;
+
+  }
+
+}
+
+
+/*----------------------------------------------------- END - Addres Provider Form ----------------------------------------------------- */
+
+/*-----------------------------------------------------  Provider Form ----------------------------------------------------- */
+.btn span.fa-check {
+	opacity: 0;
+}
+.btn.active span.fa-check {
+	opacity: 1;
+}
+
+/*----------------------------------------------------- END Provider Form ----------------------------------------------------- */
+
+/*----------------------------------------------------- Horarios Provider Form ----------------------------------------------------- */
+
+section.scheduleForm {
+
+  label {
+    padding-left: 0px;
+    padding-right: 0px;
+
+
+    &.col-1 {
+      background-color: inherit;
+      border-color: rgba(0, 0, 0, 0);
+      font-size: medium;
+      color: #2176bd;
+      font-weight: 600;
+      padding-top: 5px;
+      padding-bottom: 5px;
+
+      &:hover {
+        transform: scale(1.5);
+        width: fit-content;
+      }
+
+      &:active{
+        color: white;
+
+      }
+
+
+    }
+  }
+
+  div {
+    .weekDay {
+      display: inline-flex;
+      justify-content: space-between;
+
+      div.col-10 {
+        display: inline-flex;
+        justify-content: space-between;
+      }
+
+    }
+
+    .btn-group {
+      display: grid;
+    }
+
+
+
+  }
+
+
+  select {
+    border-top: rgb(0,0,0);
+    background-color: rgb(0,0,0);
+    border-bottom-color: lightgrey;
+    border-right: rgb(0,0,0);
+    border-left: rgb(0,0,0);
+    border-radius: inherit;
+    padding-right: 0;
+
+    // border-bottom-left-radius: inherit;
+  }
+
+  .nullOption {
+    display: none;
+  }
+
+
+}
+
+label.btn-primary, label.active, label.btn-primary:not(:disabled):not(.disabled):active, label.btn-primary:not(:disabled):not(.disabled).active, .show > label.btn-primary.dropdown-toggle {
+  // background-color: rgb(33, 119, 190);
+  // border-color:   rgb(33, 119, 190);
+  background-color: #383a4f;
+  border-color:   #383a4f;
+
+}
+
+label.btn-primary.disabled,
+label.btn-primary:disabled {
+    color: #fff;
+    // background-color: #9dc8e2;
+    // border-color: #9dc8e2;
+    background-color: #525575;
+    border-color: #525575;
+
+  }
+
+  .btn-primary:not(:disabled):not(.disabled):active{
+    background-color: #383a4f;
+    border-color: #383a4f;
+  }
+
+  .btn-primary {
+    color: #fff;
+    background-color: #525575;
+    border-color: #525575;
+
+    &:focus {
+      background-color: #383a4f;
+      border-color: #383a4f;
+
+    }
+
+
+    &:hover {
+      background-color: #525575;
+      border-color: #525575;
+    }
+  }
+
+/*----------------------------------------------------- END - Horarios Provider Form ----------------------------------------------------- */
+
+
+
+
+.wizard > .steps .current a,
+.wizard > .steps .current a:hover,
+.wizard > .steps .current a:active
+{
+    /* background: #2184be; */
+    background: #383a4f;
+    color: #fff;
+    cursor: default;
+}
+
+.wizard > .steps .done a,
+.wizard > .steps .done a:hover,
+.wizard > .steps .done a:active
+{
+    /* background: #9dc8e2; */
+    background: #898ba0;
+    color: #fff;
+}
+
+.wizard > .content
+{
+    background: #eee;
+    display: block;
+    margin: 0.5em;
+    /* min-height: 35em; */
+    min-height: 25em;
+    /* overflow: hidden; */
+    overflow: auto;
+    position: relative;
+    width: auto;
+
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.wizard > .content > .body
+{
+    float: left;
+    position: absolute;
+    /* width: 95%; */
+    width: 100%;
+    height: 100%;
+    /* height: fit-content; */
+    padding: 2.5%;
+}
+
+.wizard > .actions a,
+.wizard > .actions a:hover,
+.wizard > .actions a:active
+{
+    /* background: #2184be; */
+    background: #383a4f;
+    color: #fff;
+    display: block;
+    padding: 0.5em 1em;
+    text-decoration: none;
+
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.wizard {
+
+  // .content {
+  //   background: none;
+  // }
+
+ .steps > ul > li {
+    width: 15%;
+
+
+    &.current {
+      width: 40%;
+    }
+
+    &:not(.current) {
+
+      a {
+        padding-left: 25%;
+        padding-right: 25%;
+      }
+
+
+      &::first-line {
+        color: rgba(0, 0, 0, 0);
+      }
+
+      &::first-letter {
+        color: #aaa;
+      }
+
+    }
+    &.done {
+      &::first-letter {
+        color: #fff;
+      }
+    }
+  }
+
+  .content > .addressForm > input {
+    display: inline-flex;
+  }
+}
+
+section.scheduleForm select {
+  border-top: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
+  border-bottom-color: lightgrey;
+  border-right: rgba(0, 0, 0, 0);
+  border-left: rgba(0, 0, 0, 0);
+  border-radius: inherit;
+  padding-right: 0;
+}
+
+
+/*----------------------------------------------------- Home - DASHBOARD ----------------------------------------------------- */
+#home {
+  a {
+    text-align: center;
+    font-size: 1.5rem;
+    color: black;
+    &:hover {
+      text-decoration: none;
+      // color:#55e8d5;
+      color: palevioletred;
+    }
+
+    div {
+      margin-top: 20px;
+      BORDER-BOTTOM: INSET;
+      BORDER-BOTTOM-COLOR: GAINSBORO;
+
+    }
+  }
+}
+
+
+/*----------------------------------------------------- END - Home - DASHBOARD ----------------------------------------------------- */
+.text-error {
+  color:palevioletred;
+}
+
+/*--------------------------------------------------------- CALENDAR  --------------------------------------------------------- */
+#calendar {
+
+  .fc-toolbar {
+    text-align: center;
+  }
+
+  .arrow-icon {
+    color: #da8da6;
+    font-size: 2rem;
+    // border-color: #da8da6;
+  }
+
+  .arrow-btn{
+    background-color: inherit;
+    border-color: inherit;
+  }
+
+  .provider {
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+    margin:0;
+  }
+
+  .providerInfo {
+    // margin-bottom: 1rem;
+    margin: 0;
+
+    .icon {
+      margin: 0;
+      padding-right: 0;
+    }
+
+    .info {
+      display: block;
+      margin: 0;
+      padding-right: 0;
+
+      .name {
+        font-weight: bold;
+        font-size: 1rem;
+      }
+
+      .companyName {
+        text-transform: uppercase
+      }
+    }
+
+  }
+
+  img {
+    width: 7rem;
+  }
+
+  .availableHours {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 1rem;
+  }
+
+  .startTime {
+    margin-right: 0.4rem;
+    color: white;
+  }
+
+  .fc-left, .fc-right {
+    padding: 0;
+  }
+  .fc-search-button, .fc-dayGridMonth-button, .fc-header-toolbar {
+    width: 100%;
+    background-color: #626580;
+    border-color: #626580;
+    color: white;
+  }
+
+
+  #emptyDay {
+    HEIGHT: 65VH;
+    TEXT-ALIGN: CENTER;
+  }
+
+  #emptyMessage {
+    PADDING-TOP: 3REM;
+    padding-bottom: 2rem;
+  }
+
+
+}
+.doc-title {
+  display: block;
+}
+
+.patient-row {
+  display: flex;
+  margin-bottom: 0.2rem;
+}
+
+.fa-calendar-alt, .fc-search-button {
+  font-size: 1.7rem;
+  padding: 0;
+}
+#bookingModal {
+  #patient_medical_insurance {
+    padding-left: 0.4rem;
+  }
+
+  .modal-header {
+    background: #383a4f;
+    color: white;
+    border-bottom: inherit;
+  }
+
+  .modal-subheader {
+    background: #626580;
+    color: white;
+    padding: 1rem;
+  }
+
+
+}
+
+#booking_confirmed{
+
+  & .modal-dialog {
+    margin-top: 11rem;
+  }
+
+  .modal-header {
+    background-color: #42c3b2;
+    color: white;
+    justify-content: center;
+  }
+
+  .modal-footer {
+    justify-content: center;
+  }
+}
+
+/*----------------------------------------------------- CALENDAR - END ----------------------------------------------------- */

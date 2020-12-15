@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>O'Clock</title>
+
+    {{!-- <link rel="stylesheet" href="http://meyerweb.com/eric/tools/css/reset/reset.css">       {{!PARA EVITAR LOS DIFERENTES DEFAULT DE LOS NAVEGADORES - UTIL PARA EL MODELO DE CAJA}} --}}
+
+    {{!Styles}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
+      integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">  {{!BOOTSTRAP - SIN EL meta viewport NO FUNCIONA}}
+    {{{_sections.styles}}}
+    <link rel="stylesheet" href="/css/style.css" >
+    {{!-- <link rel="stylesheet" href="/css/fullcalendar.css"> --}}
+
+
+
+
+  </head>
+  <body>
+
+    <div id="app">
+        <nav class="navbar navbar-expand-md navbar-light {{!--bg-white --}} shadow-sm">
+            <div class="container">
+                <a class="navbar-brand" href="/">
+                    O'Clock
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <!-- Left Side Of Navbar -->
+                    <ul class="navbar-nav mr-auto">
+
+                    </ul>
+
+                    <!-- Right Side Of Navbar -->
+                    <ul class="navbar-nav ml-auto">
+                        <!-- Authentication Links -->
+                        {{#if user}}
+
+                        <li class="nav-item dropdown">
+                            <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                {{{user.name}}} <span class="caret"></span>
+                            </a>
+
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    Logout
+                                </a>
+
+                                <form id="logout-form" action="/logout" method="POST" style="display: none;">
+                                    {{!csrf}}
+                                </form>
+                            </div>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="/home" onclick="event.preventDefault();document.getElementById('home-form').submit();">
+                                    home
+                                </a>
+
+                                <form id="home-form" action="home" method="POST" style="display: none;">
+                                    {{!csrf}}
+                                </form>
+                            </div>
+                        </li>
+                        {{else}}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/register">Register</a>
+                        </li>
+                        {{/if}}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+
+
+        <main class="py-4">
+          <div id="principalContainer" class="container">
+            {{!-- {{>messages}} --}}
+
+              {{{ body }}}
+          </div>
+        </main>
+
+
+        <footer id="footer-container" class="footer-container ">
+
+          {{> footer}}
+
+        </footer>
+
+    </div>
+
+
+
+  </body>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.js"></script> {{!Script: JQUERY}}
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+  crossorigin="anonymous"></script>
+  {{!Scripts}}
+  {{{_sections.scripts}}}
+  <script src="/js/app.js" ></script> <!-- Script main: O'clock -->
+
+</html>

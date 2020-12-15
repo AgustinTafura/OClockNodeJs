@@ -1,0 +1,13 @@
+1 - RESET PASSWORD FUNCTION - JWT TOKEN -- HECHO
+2 - MODELS ==> validaciones +  UNIQUE email + temrinar foreing keys MaN ----- HECHO
+3 - MIGRATIONS -- HECHO
+4 - BUSCADOR SEARCH  -- HECHO
+
+
+5 - FORMULARIO ALTA PROVEEDOR.
+
+
+5 b - cambiar el scrip de pooper del main, e importarlo.
+6 - BUSCADOR SEARCH  -- RESUTLADOS DE BUSQUEDA PREVIO A CALENDARIO
+7 - CALENDARIO
+8 - SOLICITAR TURNOS Y GUARDAR.
