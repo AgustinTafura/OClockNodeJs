@@ -4,7 +4,7 @@ const {isLoggedIn,  isNotLoggedIn } = require('../lib/auth');
 
 const {bookingValidator, providerValidator, addressValidator, establishmentValidator, providerStore} = require('../../controller/providerController');
 
-router.get('/form', isLoggedIn, (req, res) => {
+router.get('/form', isLoggedIn,  (req, res) => {
     res.render('form')
 })
 
